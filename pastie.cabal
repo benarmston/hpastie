@@ -1,14 +1,16 @@
 Name:                pastie
 Version:             0.1
-Synopsis:            Project Synopsis Here
-Description:         Project Description Here
-License:             AllRightsReserved
-Author:              Author
-Maintainer:          maintainer@example.com
+Synopsis:            A simple paste bin web app
+Description:         A paste bin web using the snap web framework.
+License:             BSD3
+License-file:        LICENSE
+Author:              Ben Armston <ben.armston@googlemail.com>
+Maintainer:          ben.armston@googlemail.com
 Stability:           Experimental
 Category:            Web
 Build-type:          Simple
-Cabal-version:       >=1.2
+Extra-source-files:  LICENSE
+Cabal-version:       >=1.6
 
 Flag development
   Description: Whether to build the server in development (interpreted) mode
@@ -38,9 +40,9 @@ Executable pastie
   extensions: TypeSynonymInstances MultiParamTypeClasses
 
   if impl(ghc >= 6.12.0)
-    ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
+    ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields
                  -fno-warn-orphans -fno-warn-unused-do-bind
   else
-    ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
+    ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields
                  -fno-warn-orphans
 
