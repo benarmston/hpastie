@@ -18,16 +18,10 @@ Extension to any developer wishing to write their own Snap Extension.
 
 module Snap.Extension.Timer
   ( MonadTimer(..)
-  , startTimeSplice
-  , currentTimeSplice
   ) where
 
-import           Control.Monad.Trans
 import           Data.Time.Clock
-import qualified Data.Text as T
 import           Snap.Types
-import           Text.Templating.Heist
-import           Text.XmlHtml
 
 
 ------------------------------------------------------------------------------
@@ -35,19 +29,3 @@ import           Text.XmlHtml
 class MonadSnap m => MonadTimer m where
     -- | The time at which your application was last loaded.
     startTime :: m UTCTime
-
-
-------------------------------------------------------------------------------
--- | For your convenience, a splice which shows the start time.
-startTimeSplice :: MonadTimer m => Splice m
-startTimeSplice = do
-    time <- lift startTime
-    return $ [TextNode $ T.pack $ show $ time]
-
-
-------------------------------------------------------------------------------
--- | For your convenience, a splice which shows the current time.
-currentTimeSplice :: MonadTimer m => Splice m
-currentTimeSplice = do
-    time <- lift $ liftIO getCurrentTime
-    return $ [TextNode $ T.pack $ show $ time]

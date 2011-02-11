@@ -57,7 +57,7 @@ main = do
     -- All source directories will be watched for updates
     -- automatically.  If any extra directories should be watched for
     -- updates, include them here.
-    snap <- $(let extraWatcheDirs = ["resources/templates"]
+    snap <- $(let extraWatcheDirs = []
               in loadSnapTH 'applicationInitializer 'site extraWatcheDirs)
     quickHttpServe snap
 #else

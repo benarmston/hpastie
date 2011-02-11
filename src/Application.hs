@@ -11,32 +11,23 @@ module Application
   ) where
 
 import           Snap.Extension
-import           Snap.Extension.Heist.Impl
 import           Snap.Extension.Timer.Impl
 
 
 ------------------------------------------------------------------------------
 -- | 'Application' is our application's monad. It uses 'SnapExtend' from
 -- 'Snap.Extension' to provide us with an extended 'MonadSnap' making use of
--- the Heist and Timer Snap extensions.
+-- the Timer Snap extensions.
 type Application = SnapExtend ApplicationState
 
 
 ------------------------------------------------------------------------------
 -- | 'ApplicationState' is a record which contains the state needed by the Snap
--- extensions we're using.  We're using Heist so we can easily render Heist
--- templates, and Timer simply to illustrate the config loading differences
--- between development and production modes.
+-- extensions we're using.  We're Timer simply to illustrate the config
+-- loading differences between development and production modes.
 data ApplicationState = ApplicationState
-    { templateState :: HeistState Application
-    , timerState    :: TimerState
+    { timerState    :: TimerState
     }
-
-
-------------------------------------------------------------------------------
-instance HasHeistState Application ApplicationState where
-    getHeistState     = templateState
-    setHeistState s a = a { templateState = s }
 
 
 ------------------------------------------------------------------------------
@@ -53,6 +44,5 @@ instance HasTimerState ApplicationState where
 -- to worry about.
 applicationInitializer :: Initializer ApplicationState
 applicationInitializer = do
-    heist <- heistInitializer "resources/templates"
     timer <- timerInitializer
-    return $ ApplicationState heist timer
+    return $ ApplicationState timer
