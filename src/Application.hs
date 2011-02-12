@@ -12,6 +12,7 @@ module Application
 
 import           Snap.Extension
 import           Snap.Extension.Timer.Impl
+import           Snap.Extension.HDBC.Sqlite
 
 
 ------------------------------------------------------------------------------
@@ -27,6 +28,7 @@ type Application = SnapExtend ApplicationState
 -- loading differences between development and production modes.
 data ApplicationState = ApplicationState
     { timerState    :: TimerState
+    , dbState       :: HDBCState
     }
 
 
@@ -34,6 +36,12 @@ data ApplicationState = ApplicationState
 instance HasTimerState ApplicationState where
     getTimerState     = timerState
     setTimerState s a = a { timerState = s }
+
+
+------------------------------------------------------------------------------
+instance HasHDBCState ApplicationState where
+    getHDBCState     = dbState
+    setHDBCState s a = a { dbState = s }
 
 
 ------------------------------------------------------------------------------
@@ -45,4 +53,5 @@ instance HasTimerState ApplicationState where
 applicationInitializer :: Initializer ApplicationState
 applicationInitializer = do
     timer <- timerInitializer
-    return $ ApplicationState timer
+    conn <- hdbcInitializer
+    return $ ApplicationState timer conn

@@ -3,11 +3,13 @@
 module Views
     ( indexView
     , echoView
+    , tablesView
     , renderHtml
     , Html
     ) where
 
 import           Prelude hiding (head, div, id)
+import           Control.Monad(forM_)
 
 import           Text.Blaze.Html5 as H
 import           Text.Blaze.Html5.Attributes as A
@@ -55,6 +57,16 @@ echoView message = docTypeHtml $ do
         p $ "You wanted me to say this?"
         p $ toHtml message
         p $ a ! href "/" $ "Return"
+
+
+tablesView :: [String] -> Html
+tablesView tables = do
+    head $ do
+        H.title "Tables Page"
+    body $ do
+        div ! id ("content") $ do
+            h1 "All the tables in the database"
+            ul $ forM_ tables (li . toHtml)
 
 
 instance ToHtml UTCTime where

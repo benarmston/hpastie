@@ -33,6 +33,8 @@ Executable pastie
     , snap-server == 0.4.*
     , time >= 1.1 && < 1.3
     , blaze-html >= 0.4.0.0 && < 0.5
+    , HDBC == 2.2.*
+    , HDBC-sqlite3 == 2.3.*
 
   extensions: TypeSynonymInstances MultiParamTypeClasses
 

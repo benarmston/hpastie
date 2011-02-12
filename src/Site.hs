@@ -15,11 +15,14 @@ import           Control.Applicative
 import           Control.Monad.Trans(liftIO)
 import           Data.Maybe
 import           Data.Time.Clock(getCurrentTime)
+
 import           Snap.Extension.Timer
+import           Snap.Extension.HDBC
 import           Snap.Util.FileServe
 import           Snap.Types
 
 import           Application
+import           Database
 import           Views
 
 
@@ -46,6 +49,12 @@ echo = do
     decodedParam p = fromMaybe "" <$> getParam p
 
 
+------------------------------------------------------------------------------
+-- | Renders a list of the tables in the database.
+tables :: Application ()
+tables = dbConn >>= liftIO . listTables >>= blazeTemplate . tablesView
+
+
 blazeTemplate :: Html -> Application ()
 blazeTemplate template = do
     modifyResponse $ addHeader "Content-Type" "text/html; charset=UTF-8"
@@ -55,7 +64,9 @@ blazeTemplate template = do
 ------------------------------------------------------------------------------
 -- | The main entry point handler.
 site :: Application ()
-site = route [ ("/",            index)
+site = dbConn >>= (liftIO . createTableIfMissing) >>
+       route [ ("/",            index)
              , ("/echo/:stuff", echo)
+             , ("/tables",      tables)
              ]
        <|> serveDirectory "resources/static"
