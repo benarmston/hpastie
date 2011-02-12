@@ -14,13 +14,13 @@ module Site
 import           Control.Applicative
 import           Control.Monad.Trans(liftIO)
 import           Data.Maybe
-import qualified Data.ByteString.Char8 as B
 import           Data.Time.Clock(getCurrentTime)
 import           Snap.Extension.Timer
 import           Snap.Util.FileServe
 import           Snap.Types
 
 import           Application
+import           Views
 
 
 ------------------------------------------------------------------------------
@@ -31,42 +31,9 @@ import           Application
 -- would be given every request.
 index :: Application ()
 index = ifTop $ do
-    writeBS "<html><head><title>Snap web server</title>"
-    writeBS "<link rel=\"stylesheet\"type=\"text/css\"href=\"screen.css\"/>"
-    writeBS "</head>"
-    writeBS "<body>"
-    writeBS "<div id=\"content\">"
-    writeBS "<h1>It works!</h1>"
-    writeBS "<p>"
-    writeBS "This is a simple demo page served using "
-    writeBS "<a href=\"http://snapframework.com/docs/tutorials/heist\">Heist</a> "
-    writeBS "and the <a href=\"http://snapframework.com/\">Snap</a> web framework."
-    writeBS "</p>"
-    writeBS "<p>"
-    writeBS "Echo test:"
-    writeBS "<a href=\"/echo/cats\">cats</a>"
-    writeBS "<a href=\"/echo/dogs\">dogs</a>"
-    writeBS "<a href=\"/echo/fish\">fish</a>"
-    writeBS "</p>"
-    writeBS "<table id=\"info\">"
-    writeBS "<tr>"
-    writeBS "<td>Config generated at:</td>"
-    writeBS "<td>"
     start_time <- startTime
-    writeBS $ B.pack $ show start_time
-    writeBS "</td>"
-    writeBS "</tr>"
-    writeBS "<tr>"
-    writeBS "<td>Page generated at:</td>"
-    writeBS "<td>"
     current_time <- liftIO getCurrentTime
-    writeBS $ B.pack $ show current_time
-    writeBS "</td>"
-    writeBS "</tr>"
-    writeBS "</table>"
-    writeBS "</div>"
-    writeBS "</body>"
-    writeBS "</html>"
+    blazeTemplate $ indexView start_time current_time
 
 
 ------------------------------------------------------------------------------
@@ -74,16 +41,15 @@ index = ifTop $ do
 echo :: Application ()
 echo = do
     message <- decodedParam "stuff"
-    writeBS "<html><head><title>Echo Page</title></head>"
-    writeBS "<body><div id=\"content\"><h1>Is there an echo in here?</h1></div>"
-    writeBS "<p>You wanted me to say this?</p>"
-    writeBS "<p>"
-    writeBS message
-    writeBS "</p>"
-    writeBS "<p><a href=\"/\">Return</a></p>"
-    writeBS "</body></html>"
+    blazeTemplate $ echoView $ show message
   where
     decodedParam p = fromMaybe "" <$> getParam p
+
+
+blazeTemplate :: Html -> Application ()
+blazeTemplate template = do
+    modifyResponse $ addHeader "Content-Type" "text/html; charset=UTF-8"
+    writeLBS $ renderHtml template
 
 
 ------------------------------------------------------------------------------
