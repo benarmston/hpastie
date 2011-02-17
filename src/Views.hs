@@ -6,16 +6,22 @@ module Views
     , tablesView
     , renderHtml
     , Html
+    , pasteForm
+    , pasteToHtml
     ) where
 
 import           Prelude hiding (head, div, id)
 import           Control.Monad(forM_)
 
+import           Data.Time.Clock(UTCTime)
+import           Data.Time.Format(formatTime)
 import           Text.Blaze.Html5 as H
 import           Text.Blaze.Html5.Attributes as A
 import           Text.Blaze.Renderer.Utf8 (renderHtml)
 import           Snap.Types()
-import           Data.Time.Clock(UTCTime)
+import           System.Locale(defaultTimeLocale)
+
+import           Types
 
 
 indexView :: UTCTime -> UTCTime -> Html
@@ -67,6 +73,46 @@ tablesView tables = do
         div ! id ("content") $ do
             h1 "All the tables in the database"
             ul $ forM_ tables (li . toHtml)
+
+
+pasteForm :: [String] -> Paste -> Html
+pasteForm errors paste = layout "Paste form" $ do
+    H.ul ! A.class_ "errors" $ do
+        forM_ errors (H.li . H.toHtml)
+    H.form ! A.method "POST" $ do
+        H.label "Title"
+        H.input ! A.name "title" ! A.size "50" ! A.value (H.stringValue $ pasteTitle paste)
+        H.br
+        H.label "Syntax"
+        -- H.select ! A.name "syntax" ! (A.value $ H.stringValue $ pasteSyntax paste)
+        --    forM_ [""] (\o -> H.option ! value (stringValue o) $ string o)
+        H.br
+        H.textarea ! A.name "contents" ! A.rows "20" ! A.cols "76" $ H.string $ pasteContents paste
+        H.br
+        H.input ! A.type_ "submit" ! A.value "Save"
+
+
+pasteToHtml ::  Paste -> Html
+pasteToHtml paste = layout "Paste" $ do
+    H.div ! (A.id uid) $ do
+        H.h2 title
+        H.p ! A.class_ "timestamp" $ formattedTime
+        H.pre $ formattedCode
+    where contents = filter (/='\r') $ pasteContents paste
+          title = H.string $ pasteTitle paste
+          --syntax = pasteSyntax paste
+          formattedCode = H.string $ contents
+          timestamp = pasteTimestamp paste
+          formattedTime = H.string $ formatTime defaultTimeLocale "%F %R UTC" timestamp
+          uid = H.stringValue . show $ pasteId paste
+
+
+layout :: String -> Html -> Html
+layout title body = H.docTypeHtml $ do
+    H.head $ do
+        H.title $ H.string title
+    H.body $ body
+
 
 
 instance ToHtml UTCTime where
