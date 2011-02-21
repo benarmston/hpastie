@@ -29,38 +29,14 @@ import           Types
 
 
 ------------------------------------------------------------------------------
--- | Renders the front page of the sample site.
---
--- The 'ifTop' is required to limit this to the top of a route.
--- Otherwise, the way the route table is currently set up, this action
--- would be given every request.
-index :: Application ()
-index = ifTop $ do
-    start_time <- startTime
-    current_time <- liftIO getCurrentTime
-    blazeTemplate $ indexView start_time current_time
-
-
-------------------------------------------------------------------------------
--- | Renders the echo page.
-echo :: Application ()
-echo = do
-    message <- decodedParam "stuff"
-    blazeTemplate $ echoView $ show message
-  where
-    decodedParam p = fromMaybe "" <$> getParam p
-
-
-------------------------------------------------------------------------------
--- | Renders a list of the tables in the database.
-tables :: Application ()
-tables = withDb listTables >>= blazeTemplate . tablesView
-
-
+-- | Renders a form to add a new paste.
 showPasteForm :: Application ()
 showPasteForm = blazeTemplate $ pasteForm [] nullPaste
 
 
+------------------------------------------------------------------------------
+-- | Saves a new paste to the database or redisplays the form with a list of
+-- errors.
 addPaste ::  Application ()
 addPaste = do
     let isEmpty = all (`elem` " \t")
@@ -79,6 +55,8 @@ addPaste = do
            redirect $ pack ("/paste/" ++ show uid)
 
 
+------------------------------------------------------------------------------
+-- | Display a single paste.
 showPaste ::  Application ()
 showPaste = maybe pass showPaste' =<< getParam "id"
     where
@@ -86,6 +64,8 @@ showPaste = maybe pass showPaste' =<< getParam "id"
       pasteFromId pid = withDb $ flip getPasteFromDb . read . unpack $ pid
 
 
+------------------------------------------------------------------------------
+-- | Renders a BlazeHtml template and writes it to the response stream.
 blazeTemplate :: Html -> Application ()
 blazeTemplate template = do
     modifyResponse $ addHeader "Content-Type" "text/html; charset=UTF-8"
@@ -96,11 +76,8 @@ blazeTemplate template = do
 -- | The main entry point handler.
 site :: Application ()
 site = withDb createTableIfMissing >>
-       route [ ("/",            index)
-             , ("/echo/:stuff", echo)
-             , ("/tables",      tables)
-             , ("/pastes",    method GET  $ showPasteForm)
-             , ("/pastes",    method POST $ addPaste)
+       route [ ("/new",       method GET  $ showPasteForm)
+             , ("/new",       method POST $ addPaste)
              , ("/paste/:id", method GET  $ showPaste)
              ]
        <|> serveDirectory "resources/static"

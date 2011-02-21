@@ -1,6 +1,5 @@
 module Database
     ( createTableIfMissing
-    , listTables
     , savePasteToDb
     , getPasteFromDb
     ) where
@@ -19,10 +18,6 @@ createTableIfMissing db = do
         run db ("CREATE TABLE pastes (id INTEGER PRIMARY KEY AUTOINCREMENT," ++
             " title TEXT, timestamp DATE, syntax VARCHAR(20), contents TEXT)") []
         commit db
-
-
-listTables ::  (IConnection conn) => conn -> IO [String]
-listTables = handleSqlError . getTables
 
 
 savePasteToDb :: (IConnection conn, MonadIO m) => conn -> Paste -> m Integer
