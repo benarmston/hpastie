@@ -54,7 +54,7 @@ echo = do
 ------------------------------------------------------------------------------
 -- | Renders a list of the tables in the database.
 tables :: Application ()
-tables = dbConn >>= liftIO . listTables >>= blazeTemplate . tablesView
+tables = withDb listTables >>= blazeTemplate . tablesView
 
 
 showPasteForm :: Application ()
@@ -75,21 +75,15 @@ addPaste = do
     if not (null errors)
        then blazeTemplate $ pasteForm errors paste
        else do
-           db <- dbConn
-           uid <- savePasteToDb db paste
+           uid <- withDb $ flip savePasteToDb paste
            redirect $ pack ("/paste/" ++ show uid)
 
 
 showPaste ::  Application ()
-showPaste = do
-    uid <- getParam "id"
-    case uid of
-         -- Doesn't seem to be working.
-         Nothing -> pass
-         Just pid -> do
-             db <- dbConn
-             let pid' = read $ unpack pid
-             getPasteFromDb db pid' >>= ( blazeTemplate . pasteToHtml )
+showPaste = maybe pass showPaste' =<< getParam "id"
+    where
+      showPaste' pid = pasteFromId pid >>= ( blazeTemplate . pasteToHtml )
+      pasteFromId pid = withDb $ flip getPasteFromDb . read . unpack $ pid
 
 
 blazeTemplate :: Html -> Application ()
@@ -101,7 +95,7 @@ blazeTemplate template = do
 ------------------------------------------------------------------------------
 -- | The main entry point handler.
 site :: Application ()
-site = dbConn >>= (liftIO . createTableIfMissing) >>
+site = withDb createTableIfMissing >>
        route [ ("/",            index)
              , ("/echo/:stuff", echo)
              , ("/tables",      tables)

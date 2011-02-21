@@ -16,18 +16,28 @@ import           Snap.Extension.HDBC
 import           Snap.Types
 
 
+------------------------------------------------------------------------------
 newtype HDBCState = HDBCState
-    { _dbConn :: Connection
+    { _dbConn :: ConnWrapper
     }
 
+
+------------------------------------------------------------------------------
 class HasHDBCState s where
     getHDBCState :: s -> HDBCState
     setHDBCState :: HDBCState -> s -> s
 
+    modifyHDBCState :: (HDBCState -> HDBCState) -> s -> s
+    modifyHDBCState f s = setHDBCState (f $ getHDBCState s) s
+
+
+------------------------------------------------------------------------------
+-- XXX Should take the connection string as an argument.
+-- XXX Should implement a pool. At least for non-sqlite implementations.
 hdbcInitializer :: Initializer HDBCState
 hdbcInitializer = do
     db <- liftIO $ handleSqlError $ connectSqlite3 "pastes.sql"
-    mkInitializer $ HDBCState db
+    mkInitializer $ HDBCState $ ConnWrapper db
 
 
 ------------------------------------------------------------------------------

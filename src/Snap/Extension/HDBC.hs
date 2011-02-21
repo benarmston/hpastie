@@ -1,15 +1,15 @@
+{-# LANGUAGE RankNTypes #-}
+
 module Snap.Extension.HDBC
   ( MonadHDBC(..)
   ) where
 
--- XXX Importing Sqlite3 shouldn't be neccessary here.
--- We ought to use something like
---     dbConn :: IConnection conn => m conn
--- but I can't get that working at the moment.
-import           Database.HDBC.Sqlite3
-import           Snap.Types
+import Control.Monad.Trans
+import Database.HDBC
 
 
 ------------------------------------------------------------------------------
-class MonadSnap m => MonadHDBC m where
-    dbConn :: m Connection
+class MonadIO m => MonadHDBC m where
+    dbConn :: m ConnWrapper
+    withDb :: (forall c. IConnection c => c -> IO b) -> m b
+    withDb query = dbConn >>= liftIO . query
