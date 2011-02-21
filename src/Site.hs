@@ -66,10 +66,12 @@ showPaste = maybe pass showPaste' =<< getParam "id"
 
 ------------------------------------------------------------------------------
 -- | Renders a BlazeHtml template and writes it to the response stream.
-blazeTemplate :: Html -> Application ()
+blazeTemplate :: Template -> Application ()
 blazeTemplate template = do
+    start_time <- startTime
+    current_time <- liftIO getCurrentTime
     modifyResponse $ addHeader "Content-Type" "text/html; charset=UTF-8"
-    writeLBS $ renderHtml template
+    writeLBS $ renderHtml $ template start_time current_time
 
 
 ------------------------------------------------------------------------------

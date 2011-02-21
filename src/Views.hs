@@ -2,7 +2,6 @@
 
 module Views
     ( renderHtml
-    , Html
     , pasteForm
     , pasteToHtml
     ) where
@@ -21,7 +20,7 @@ import           System.Locale(defaultTimeLocale)
 import           Types
 
 
-pasteForm :: [String] -> Paste -> Html
+pasteForm :: [String] -> Paste -> Template
 pasteForm errors paste = layout "Paste form" $ do
     H.ul ! A.class_ "errors" $ do
         forM_ errors (H.li . H.toHtml)
@@ -38,7 +37,7 @@ pasteForm errors paste = layout "Paste form" $ do
         H.input ! A.type_ "submit" ! A.value "Save"
 
 
-pasteToHtml ::  Paste -> Html
+pasteToHtml ::  Paste -> Template
 pasteToHtml paste = layout "Paste" $ do
     H.div ! (A.id uid) $ do
         H.h2 title
@@ -53,11 +52,15 @@ pasteToHtml paste = layout "Paste" $ do
           uid = H.stringValue . show $ pasteId paste
 
 
-layout :: String -> Html -> Html
-layout title body = H.docTypeHtml $ do
+layout :: String -> Html -> Template
+layout title body start_time current_time = H.docTypeHtml $ do
     H.head $ do
         H.title $ H.string title
-    H.body $ body
+    H.body $ do
+        body
+        H.div ! A.id "footer" $ do
+            string "Config generated at " >> toHtml start_time
+            string ". Page generated at " >> toHtml current_time
 
 
 

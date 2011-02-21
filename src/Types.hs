@@ -1,10 +1,13 @@
 module Types
-    ( Paste(..)
+    ( Template
+    , Paste(..)
     , nullPaste
     ) where
 
 import           Data.Time.Clock(UTCTime)
+import           Text.Blaze.Html5 (Html)
 
+type Template = UTCTime -> UTCTime -> Html
 
 data Paste = Paste { pasteId :: Integer
                    , pasteTitle :: String
