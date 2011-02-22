@@ -15,6 +15,7 @@ import           Data.Time.Format(formatTime)
 import           Text.Blaze.Html5 as H
 import           Text.Blaze.Html5.Attributes as A
 import           Text.Blaze.Renderer.Utf8 (renderHtml)
+import           Text.Highlighting.Kate (FormatOption(..), languages, highlightAs, formatAsXHtml, defaultHighlightingCss)
 import           Snap.Types()
 import           System.Locale(defaultTimeLocale)
 
@@ -37,8 +38,8 @@ pasteForm errors paste = layout "Paste form" $ do
         input ! name "title" ! size "50" ! value (toValue $ pasteTitle paste)
         br
         H.label "Syntax"
-        -- H.select ! A.name "syntax" ! (A.value $ H.stringValue $ pasteSyntax paste)
-        --    forM_ [""] (\o -> H.option ! value (stringValue o) $ string o)
+        select ! name "syntax" ! (value $ toValue $ pasteSyntax paste) $ do
+          forM_ ("":languages) (\o -> option ! value (toValue o) $ toHtml o)
         br
         textarea ! name "contents" ! rows "20" ! cols "76" $ toHtml $ pasteContents paste
         br
@@ -52,8 +53,10 @@ pasteToHtml paste = layout "Paste" $ do
         p ! class_ "timestamp" $ formattedTime
         pre $ formattedCode
     where contents = filter (/='\r') $ pasteContents paste
-          --syntax = pasteSyntax paste
-          formattedCode = toHtml $ contents
+          syntax = pasteSyntax paste
+          formattedCode = case highlightAs syntax contents of
+                               Left _ -> pre $ toHtml contents
+                               Right c -> preEscapedString . show $ formatAsXHtml [OptNumberLines] syntax c
           timestamp = pasteTimestamp paste
           formattedTime = toHtml $ formatTime defaultTimeLocale "%F %R UTC" timestamp
           uid = toValue $ pId paste
@@ -63,6 +66,9 @@ layout :: String -> Html -> Template
 layout page_title page_body start_time current_time = docTypeHtml $ do
     head $ do
         H.title $ toHtml page_title
+        -- XXX Move outside of layout. Perhaps views can provide a page_head
+        -- to include?
+        H.style ! type_ "text/css" $ toHtml defaultHighlightingCss
     body $ do
         page_body
         div ! id "footer" $ do
