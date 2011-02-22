@@ -60,11 +60,11 @@ pasteToHtml paste = layout "Paste" $ do
 
 
 layout :: String -> Html -> Template
-layout title body start_time current_time = H.docTypeHtml $ do
+layout page_title page_body start_time current_time = H.docTypeHtml $ do
     H.head $ do
-        H.title $ H.string title
+        H.title $ H.string page_title
     H.body $ do
-        body
+        page_body
         H.div ! A.id "footer" $ do
             string "Config generated at " >> toHtml start_time
             string ". Page generated at " >> toHtml current_time
