@@ -2,6 +2,7 @@ module Database
     ( createTableIfMissing
     , savePasteToDb
     , getPasteFromDb
+    , getAllPastes
     ) where
 
 import           Control.Monad (unless, MonadPlus, mzero)
@@ -31,6 +32,18 @@ savePasteToDb db paste = do
     [[uid]] <- liftIO $ quickQuery db "SELECT last_insert_rowid()" []
     return (fromSql uid)
 
+
+getAllPastes :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> m [Paste]
+getAllPastes db = do
+    pastes <- liftIO $ handleSqlError $ quickQuery db "SELECT * FROM pastes ORDER BY title" []
+    return $ map makePaste pastes
+    where makePaste ([pid, tit, ts, synt, cont]) =
+              Paste { pasteId = fromSql pid
+                    , pasteTitle = fromSql tit
+                    , pasteTimestamp = fromSql ts
+                    , pasteSyntax = fromSql synt
+                    , pasteContents = fromSql cont }
+          makePaste _ = nullPaste
 
 getPasteFromDb :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> Integer -> m Paste
 getPasteFromDb db uid = do

@@ -29,6 +29,12 @@ import           Types
 
 
 ------------------------------------------------------------------------------
+-- | Render a list of all pastes
+showPasteList :: Application ()
+showPasteList = withDb getAllPastes >>= (blazeTemplate . pasteList)
+
+
+------------------------------------------------------------------------------
 -- | Renders a form to add a new paste.
 showPasteForm :: Application ()
 showPasteForm = blazeTemplate $ pasteForm [] nullPaste
@@ -78,7 +84,8 @@ blazeTemplate template = do
 -- | The main entry point handler.
 site :: Application ()
 site = withDb createTableIfMissing >>
-       route [ ("/new",       method GET  $ showPasteForm)
+       route [ ("/",          method GET  $ showPasteList)
+             , ("/new",       method GET  $ showPasteForm)
              , ("/new",       method POST $ addPaste)
              , ("/paste/:id", method GET  $ showPaste)
              ]

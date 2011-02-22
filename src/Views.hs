@@ -4,6 +4,7 @@ module Views
     ( renderHtml
     , pasteForm
     , pasteToHtml
+    , pasteList
     ) where
 
 import           Prelude hiding (head, div, id)
@@ -18,6 +19,13 @@ import           Snap.Types()
 import           System.Locale(defaultTimeLocale)
 
 import           Types
+
+
+pasteList :: [Paste] -> Template
+pasteList pastes = layout "All pastes" $ do
+    ul ! class_ "pastes" $ do
+        forM_ pastes (li . synopsis)
+    where synopsis paste = a ! href (pUrl paste) $ pTitle paste
 
 
 pasteForm :: [String] -> Paste -> Template
@@ -40,11 +48,10 @@ pasteForm errors paste = layout "Paste form" $ do
 pasteToHtml ::  Paste -> Template
 pasteToHtml paste = layout "Paste" $ do
     H.div ! (A.id uid) $ do
-        H.h2 title
+        H.h2 $ pTitle paste
         H.p ! A.class_ "timestamp" $ formattedTime
         H.pre $ formattedCode
     where contents = filter (/='\r') $ pasteContents paste
-          title = H.string $ pasteTitle paste
           --syntax = pasteSyntax paste
           formattedCode = H.string $ contents
           timestamp = pasteTimestamp paste
@@ -62,6 +69,13 @@ layout title body start_time current_time = H.docTypeHtml $ do
             string "Config generated at " >> toHtml start_time
             string ". Page generated at " >> toHtml current_time
 
+
+pTitle :: Paste -> Html
+pTitle = toHtml . pasteTitle
+
+
+pUrl :: Paste -> AttributeValue
+pUrl paste = stringValue $ "/paste/" ++ (show $ pasteId paste)
 
 
 instance ToHtml UTCTime where
