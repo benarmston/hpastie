@@ -18,14 +18,15 @@ import           Snap.Extension.HDBC.Sqlite
 ------------------------------------------------------------------------------
 -- | 'Application' is our application's monad. It uses 'SnapExtend' from
 -- 'Snap.Extension' to provide us with an extended 'MonadSnap' making use of
--- the Timer Snap extensions.
+-- the HDBC and Timer Snap extensions.
 type Application = SnapExtend ApplicationState
 
 
 ------------------------------------------------------------------------------
--- | 'ApplicationState' is a record which contains the state needed by the Snap
--- extensions we're using.  We're Timer simply to illustrate the config
--- loading differences between development and production modes.
+-- | 'ApplicationState' is a record which contains the state needed by the
+-- Snap extensions we're using.  We're using Timer simply to illustrate the
+-- config loading differences between development and production modes, and
+-- we're using HDBC to provide database connectivity.
 data ApplicationState = ApplicationState
     { timerState    :: TimerState
     , dbState       :: HDBCState
