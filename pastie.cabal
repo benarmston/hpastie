@@ -1,7 +1,7 @@
 Name:                pastie
 Version:             0.1
 Synopsis:            A simple paste bin web app
-Description:         A paste bin web using the snap web framework.
+Description:         A paste bin web app using the snap web framework.
 License:             BSD3
 License-file:        LICENSE
 Author:              Ben Armston <ben.armston@googlemail.com>
