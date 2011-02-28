@@ -37,7 +37,7 @@ pasteForm errors paste = layout "Paste form" $ do
         H.label "Title"
         input ! name "title" ! size "50" ! value (toValue $ pasteTitle paste)
         br
-        H.label "Syntax"
+        H.label "Language"
         select ! name "syntax" ! (value $ toValue $ pasteSyntax paste) $ do
           forM_ ("":languages) (\o -> option ! value (toValue o) $ toHtml o)
         br
