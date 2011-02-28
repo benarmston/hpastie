@@ -3,6 +3,8 @@ module Database
     , savePasteToDb
     , getPasteFromDb
     , getAllPastes
+    , getAllUsedLanguages
+    , getPastesForLang
     ) where
 
 import           Control.Monad (unless, MonadPlus, mzero)
@@ -57,3 +59,24 @@ getPasteFromDb db uid = do
                           , pasteSyntax = fromSql synt
                           , pasteContents = fromSql cont }
          _ -> mzero
+
+
+getAllUsedLanguages :: (MonadIO m, IConnection conn) => conn -> m [String]
+getAllUsedLanguages db = do
+    langs <- liftIO $ handleSqlError $
+               quickQuery db "SELECT DISTINCT syntax FROM pastes WHERE syntax != \"\" ORDER BY syntax" []
+    return $ map (fromSql . (!! 0)) langs
+
+
+getPastesForLang :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> String -> m [Paste]
+getPastesForLang db lang = do
+    pastes <- liftIO $ handleSqlError $
+                quickQuery db "SELECT * FROM pastes WHERE syntax = ? ORDER BY title" [toSql lang]
+    return $ map makePaste pastes
+    where makePaste ([pid, tit, ts, synt, cont]) =
+              Paste { pasteId = fromSql pid
+                    , pasteTitle = fromSql tit
+                    , pasteTimestamp = fromSql ts
+                    , pasteSyntax = fromSql synt
+                    , pasteContents = fromSql cont }
+          makePaste _ = nullPaste

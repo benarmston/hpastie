@@ -5,6 +5,8 @@ module Views
     , pasteForm
     , pasteToHtml
     , pasteList
+    , languageList
+    , languageToHtml
     ) where
 
 import           Prelude hiding (head, div, id)
@@ -62,6 +64,26 @@ pasteToHtml paste = layout "Paste" $ do
           formattedTime = formatTime defaultTimeLocale "%F %R UTC" timestamp
           uid = toValue $ pId paste
           maybeDisplaySyntax = if syntax == "" then "" else p ! class_ "syntax" $ toHtml $ "Language " ++ syntax
+
+
+languageList ::  [String] -> Template
+languageList langs = layout "Languages" $ do
+    ul ! class_ "languages" $ do
+        forM_ langs (li . link_to_lang)
+    where link_to_lang l = a ! href (url l) $ toHtml l
+          url l = toValue $ "/language/" ++ l
+
+
+languageToHtml :: String -> [Paste] -> Template
+languageToHtml l pastes = layout ("Pastes for " ++ l) $ do
+    p intro
+    ul ! class_ "pastes" $ do
+        forM_ pastes (li . synopsis)
+    where synopsis paste = a ! href (pUrl paste) $ pTitle paste
+          intro = toHtml $ if l == ""
+                              then "All pastes with no language"
+                              else "All pastes for language " ++ l
+
 
 
 layout :: String -> Html -> Template

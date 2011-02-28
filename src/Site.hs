@@ -71,6 +71,22 @@ showPaste = maybe pass showPaste' =<< getParam "id"
 
 
 ------------------------------------------------------------------------------
+-- | Display a list of all languages used by the pastes
+showLanguageList ::  Application ()
+showLanguageList = withDb getAllUsedLanguages >>= (blazeTemplate . languageList)
+
+
+------------------------------------------------------------------------------
+-- | Display a list of all pastes for the given language.
+showLanguage ::  Application ()
+showLanguage = do
+    lang <- decodeParam "lang"
+    pastes <- withDb $ flip getPastesForLang lang
+    blazeTemplate $ languageToHtml lang pastes
+    where decodeParam p = getParam p >>= (return . unpack . fromMaybe "")
+
+
+------------------------------------------------------------------------------
 -- | Renders a BlazeHtml template and writes it to the response stream.
 blazeTemplate :: Template -> Application ()
 blazeTemplate template = do
@@ -88,5 +104,7 @@ site = withDb createTableIfMissing >>
              , ("/new",       method GET  $ showPasteForm)
              , ("/new",       method POST $ addPaste)
              , ("/paste/:id", method GET  $ showPaste)
+             , ("/languages", method GET  $ showLanguageList)
+             , ("/language/:lang", method GET $ showLanguage)
              ]
        <|> serveDirectory "resources/static"
