@@ -63,7 +63,10 @@ pasteToHtml paste = layout "Paste" $ do
           timestamp = pasteTimestamp paste
           formattedTime = formatTime defaultTimeLocale "%F %R UTC" timestamp
           uid = toValue $ pId paste
-          maybeDisplaySyntax = if syntax == "" then "" else p ! class_ "syntax" $ toHtml $ "Language " ++ syntax
+          maybeDisplaySyntax = if syntax == ""
+                                  then ""
+                                  else p ! class_ "syntax" $ "Language " >> syntaxLink
+          syntaxLink = a ! href (toValue $ "/language/" ++ syntax) $ toHtml syntax
 
 
 languageList ::  [String] -> Template
