@@ -100,7 +100,7 @@ blazeTemplate template = do
 -- | The main entry point handler.
 site :: Application ()
 site = withDb createTableIfMissing >>
-       route [ ("/",          method GET  $ showPasteList)
+       route [ ("/",          method GET  $ ifTop $ showPasteList)
              , ("/new",       method GET  $ showPasteForm)
              , ("/new",       method POST $ addPaste)
              , ("/paste/:id", method GET  $ showPaste)
