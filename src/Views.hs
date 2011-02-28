@@ -50,7 +50,8 @@ pasteToHtml ::  Paste -> Template
 pasteToHtml paste = layout "Paste" $ do
     div ! (id uid) $ do
         h2 $ pTitle paste
-        p ! class_ "timestamp" $ formattedTime
+        p ! class_ "timestamp" $ toHtml $ "Uploaded at " ++ formattedTime
+        maybeDisplaySyntax
         pre $ formattedCode
     where contents = filter (/='\r') $ pasteContents paste
           syntax = pasteSyntax paste
@@ -58,8 +59,9 @@ pasteToHtml paste = layout "Paste" $ do
                                Left _ -> pre $ toHtml contents
                                Right c -> preEscapedString . show $ formatAsXHtml [OptNumberLines] syntax c
           timestamp = pasteTimestamp paste
-          formattedTime = toHtml $ formatTime defaultTimeLocale "%F %R UTC" timestamp
+          formattedTime = formatTime defaultTimeLocale "%F %R UTC" timestamp
           uid = toValue $ pId paste
+          maybeDisplaySyntax = if syntax == "" then "" else p ! class_ "syntax" $ toHtml $ "Language " ++ syntax
 
 
 layout :: String -> Html -> Template
