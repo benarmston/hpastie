@@ -70,8 +70,10 @@ layout page_title page_body start_time current_time = docTypeHtml $ do
         -- to include?
         H.style ! type_ "text/css" $ toHtml defaultHighlightingCss
     body $ do
+        header $ do
+            h1 $ a ! href "/" $ "Ben's paste bin"
         page_body
-        div ! id "footer" $ do
+        footer $ do
             string "Config generated at " >> toHtml start_time
             string ". Page generated at " >> toHtml current_time
 
