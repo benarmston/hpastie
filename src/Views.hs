@@ -99,6 +99,10 @@ layout page_title page_body start_time current_time = docTypeHtml $ do
     body $ do
         header $ do
             h1 $ a ! href "/" $ "Ben's paste bin"
+            nav $ do
+                a ! href "/" $ "All pastes"
+                " | "
+                a ! href "/languages" $ "All used languages"
         page_body
         footer $ do
             string "Config generated at " >> toHtml start_time
