@@ -12,10 +12,12 @@ module Site
   ) where
 
 import           Control.Applicative
+import           Control.Monad ((<=<))
 import           Control.Monad.Trans(liftIO)
 import           Data.Maybe
 import           Data.Time.Clock(getCurrentTime)
 
+import           Data.ByteString (ByteString)
 import           Data.ByteString.Char8 (pack, unpack)
 import           Snap.Extension.Timer
 import           Snap.Extension.HDBC
@@ -45,13 +47,12 @@ showPasteForm = blazeTemplate $ pasteForm [] nullPaste
 -- errors.
 addPaste ::  Application ()
 addPaste = do
-    let isEmpty = all (`elem` " \t")
-    title <- getParam "title"
-    contents <- getParam "contents"
-    syntax <- getParam "syntax"
-    let paste = nullPaste { pasteTitle = ( unpack $ fromMaybe "" title )
-                          , pasteContents = (unpack $ fromMaybe "" contents)
-                          , pasteSyntax = (unpack $ fromMaybe "" syntax) }
+    title <- decodeParam "title"
+    contents <- decodeParam "contents"
+    syntax <- decodeParam "syntax"
+    let paste = nullPaste { pasteTitle = title
+                          , pasteContents = contents
+                          , pasteSyntax = syntax }
     let errors = ["Title must not be empty" | isEmpty (pasteTitle paste)] ++
                  ["Contents must not be empty" | isEmpty (pasteContents paste)]
     if not (null errors)
@@ -59,6 +60,7 @@ addPaste = do
        else do
            uid <- withDb $ flip savePasteToDb paste
            redirect $ pack ("/paste/" ++ show uid)
+    where isEmpty = all (`elem` " \t")
 
 
 ------------------------------------------------------------------------------
@@ -83,7 +85,6 @@ showLanguage = do
     lang <- decodeParam "lang"
     pastes <- withDb $ flip getPastesForLang lang
     blazeTemplate $ languageToHtml lang pastes
-    where decodeParam p = getParam p >>= (return . unpack . fromMaybe "")
 
 
 ------------------------------------------------------------------------------
@@ -94,6 +95,13 @@ blazeTemplate template = do
     current_time <- liftIO getCurrentTime
     modifyResponse $ addHeader "Content-Type" "text/html; charset=UTF-8"
     writeLBS $ renderHtml $ template start_time current_time
+
+
+------------------------------------------------------------------------------
+-- | Return the value of the given parameter or an empty string if the
+-- parameter doesn't exist.
+decodeParam :: ByteString -> Application String
+decodeParam = return . unpack . fromMaybe "" <=< getParam
 
 
 ------------------------------------------------------------------------------
