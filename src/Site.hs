@@ -68,14 +68,14 @@ addPaste = do
 showPaste ::  Application ()
 showPaste = maybe pass showPaste' =<< getParam "id"
     where
-      showPaste' pid = pasteFromId pid >>= ( blazeTemplate . pasteToHtml )
+      showPaste' = blazeTemplate . pasteToHtml <=< pasteFromId
       pasteFromId pid = withDb $ flip getPasteFromDb . read . unpack $ pid
 
 
 ------------------------------------------------------------------------------
 -- | Display a list of all languages used by the pastes
 showLanguageList ::  Application ()
-showLanguageList = withDb getAllUsedLanguages >>= (blazeTemplate . languageList)
+showLanguageList = withDb getAllUsedLanguages >>= blazeTemplate . languageList
 
 
 ------------------------------------------------------------------------------
