@@ -12,6 +12,9 @@ module Views
 import           Prelude hiding (head, div, id)
 import           Control.Monad(forM_)
 
+--import           Data.ByteString (ByteString)
+--import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Char8 as B -- (ByteString, unpack)
 import           Data.Time.Clock(UTCTime)
 import           Data.Time.Format(formatTime)
 import           Text.Blaze.Html5 as H
@@ -55,8 +58,8 @@ pasteToHtml paste = layout "Paste" $ do
         p ! class_ "timestamp" $ toHtml $ "Uploaded at " ++ formattedTime
         maybeDisplaySyntax
         pre $ formattedCode
-    where contents = filter (/='\r') $ pasteContents paste
-          syntax = pasteSyntax paste
+    where contents = B.unpack $ B.filter (/='\r') $ pasteContents paste
+          syntax = B.unpack $ pasteSyntax paste
           formattedCode = case highlightAs syntax contents of
                                Left _ -> pre $ toHtml contents
                                Right c -> preEscapedString . show $ formatAsXHtml [OptNumberLines] syntax c
@@ -77,15 +80,15 @@ languageList langs = layout "Languages" $ do
           url l = toValue $ "/language/" ++ l
 
 
-languageToHtml :: String -> [Paste] -> Template
-languageToHtml l pastes = layout ("Pastes for " ++ l) $ do
+languageToHtml :: B.ByteString -> [Paste] -> Template
+languageToHtml l pastes = layout ("Pastes for " ++ (B.unpack l)) $ do
     p intro
     ul ! class_ "pastes" $ do
         forM_ pastes (li . synopsis)
     where synopsis paste = a ! href (pUrl paste) $ pTitle paste
           intro = toHtml $ if l == ""
                               then "All pastes with no language"
-                              else "All pastes for language " ++ l
+                              else "All pastes for language " ++ (B.unpack l)
 
 
 
@@ -123,3 +126,11 @@ pId = show . pasteId
 
 instance ToHtml UTCTime where
     toHtml = string . show
+
+
+-- XXX Let's just get it compiling for now.
+instance ToValue B.ByteString where
+    toValue = toValue . B.unpack
+
+instance ToHtml B.ByteString where
+    toHtml = toHtml . B.unpack

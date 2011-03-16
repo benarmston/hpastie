@@ -1,9 +1,12 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Types
     ( Template
     , Paste(..)
     , nullPaste
     ) where
 
+import           Data.ByteString (ByteString)
 import           Data.Time.Clock(UTCTime)
 import           Text.Blaze.Html5 (Html)
 
@@ -17,10 +20,10 @@ type Template = UTCTime -> UTCTime -> Html
 
 ------------------------------------------------------------------------------
 data Paste = Paste { pasteId :: Integer         -- ^ The primary key.
-                   , pasteTitle :: String       -- ^ The paste's title.
+                   , pasteTitle :: ByteString       -- ^ The paste's title.
                    , pasteTimestamp :: UTCTime  -- ^ The creation date of the paste.
-                   , pasteSyntax :: String      -- ^ The syntax to use for syntax highlighting. Any syntax supported by 'Text.Highlighting.Kate'.
-                   , pasteContents :: String }
+                   , pasteSyntax :: ByteString      -- ^ The syntax to use for syntax highlighting. Any syntax supported by 'Text.Highlighting.Kate'.
+                   , pasteContents :: ByteString }
 
 
 ------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ module Database
 
 import           Control.Monad (unless, MonadPlus, mzero)
 import           Control.Monad.Trans(MonadIO, liftIO)
+import qualified Data.ByteString.Char8 as B
 import           Data.Time.Clock(getCurrentTime)
 import           Database.HDBC
 import           Types
@@ -68,7 +69,7 @@ getAllUsedLanguages db = do
     return $ map (fromSql . (!! 0)) langs
 
 
-getPastesForLang :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> String -> m [Paste]
+getPastesForLang :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> B.ByteString -> m [Paste]
 getPastesForLang db lang = do
     pastes <- liftIO $ handleSqlError $
                 quickQuery db "SELECT * FROM pastes WHERE syntax = ? ORDER BY title" [toSql lang]

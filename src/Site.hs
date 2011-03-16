@@ -17,8 +17,8 @@ import           Control.Monad.Trans(liftIO)
 import           Data.Maybe
 import           Data.Time.Clock(getCurrentTime)
 
-import           Data.ByteString (ByteString)
-import           Data.ByteString.Char8 (pack, unpack)
+--import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B
 import           Snap.Extension.Timer
 import           Snap.Extension.HDBC
 import           Snap.Util.FileServe
@@ -56,11 +56,11 @@ addPaste = do
     let errors = ["Title must not be empty" | isEmpty (pasteTitle paste)] ++
                  ["Contents must not be empty" | isEmpty (pasteContents paste)]
     if not (null errors)
-       then blazeTemplate $ pasteForm errors paste
+       then blazeTemplate $ pasteForm (map B.unpack errors) paste
        else do
            uid <- withDb $ flip savePasteToDb paste
-           redirect $ pack ("/paste/" ++ show uid)
-    where isEmpty = all (`elem` " \t")
+           redirect $ B.pack ("/paste/" ++ show uid)
+    where isEmpty = B.all (`B.elem` " \t")
 
 
 ------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ showPaste ::  Application ()
 showPaste = maybe pass showPaste' =<< getParam "id"
     where
       showPaste' = blazeTemplate . pasteToHtml <=< pasteFromId
-      pasteFromId pid = withDb $ flip getPasteFromDb . read . unpack $ pid
+      pasteFromId pid = withDb $ flip getPasteFromDb . read . B.unpack $ pid
 
 
 ------------------------------------------------------------------------------
@@ -100,8 +100,8 @@ blazeTemplate template = do
 ------------------------------------------------------------------------------
 -- | Return the value of the given parameter or an empty string if the
 -- parameter doesn't exist.
-decodeParam :: ByteString -> Application String
-decodeParam = return . unpack . fromMaybe "" <=< getParam
+decodeParam :: B.ByteString -> Application B.ByteString
+decodeParam = return . fromMaybe "" <=< getParam
 
 
 ------------------------------------------------------------------------------
