@@ -39,7 +39,7 @@ getAllPastes :: (MonadIO m, IConnection conn) => conn -> m [Paste]
 getAllPastes db = pastesFromQuery db "SELECT * FROM pastes ORDER BY title" []
 
 
-getPasteFromDb :: (Functor m, MonadIO m, IConnection conn) => conn -> Integer -> m Paste
+getPasteFromDb :: (Functor m, MonadIO m, IConnection conn) => conn -> Integer -> m (Maybe Paste)
 getPasteFromDb db uid = do
     pasteFromQuery db "SELECT * FROM pastes WHERE id = ?" [toSql uid]
 
@@ -56,9 +56,12 @@ getPastesForLang db lang =
     pastesFromQuery db "SELECT * FROM pastes WHERE syntax = ? ORDER BY title" [toSql lang]
 
 
-pasteFromQuery :: (Functor m, MonadIO m, IConnection conn) => conn -> String -> [SqlValue] -> m Paste
-pasteFromQuery db sqlString sqlArgs =
-    fmap (!! 0) $ pastesFromQuery db sqlString sqlArgs
+pasteFromQuery :: (Functor m, MonadIO m, IConnection conn) => conn -> String -> [SqlValue] -> m (Maybe Paste)
+pasteFromQuery db sqlString sqlArgs = do
+    pastes <- pastesFromQuery db sqlString sqlArgs
+    case pastes of
+         [] -> return Nothing
+         _  -> return . Just $ pastes !! 0
 
 
 pastesFromQuery :: (MonadIO m, IConnection conn) => conn -> String -> [SqlValue] -> m [Paste]

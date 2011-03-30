@@ -66,10 +66,13 @@ addPaste = do
 ------------------------------------------------------------------------------
 -- | Display a single paste.
 showPaste ::  Application ()
-showPaste = maybe pass showPaste' =<< getParam "id"
+showPaste = getParam "id" >>= maybe pass readPid >>= maybe pass pasteFromId >>= maybe pass showPaste'
     where
-      showPaste' = blazeTemplate . pasteToHtml <=< pasteFromId
-      pasteFromId pid = withDb $ flip getPasteFromDb . read . unpack $ pid
+      readPid pid = case reads (unpack pid) of
+                        [(pid', "")] -> return $ Just pid'
+                        _            -> return $ Nothing
+      showPaste' = blazeTemplate . pasteToHtml
+      pasteFromId pid = withDb $ flip getPasteFromDb pid
 
 
 ------------------------------------------------------------------------------
