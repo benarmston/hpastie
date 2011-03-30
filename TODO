@@ -1,0 +1,5 @@
+ - Improve error handling
+   - Navigating to /paste/10/some/more/stuff doesn't return a 404, but renders
+     as if the URL was /paste/10
+ - Add "Add paste link"
+ - Only include css for pages that need it
