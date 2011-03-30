@@ -7,7 +7,7 @@ module Database
     , getPastesForLang
     ) where
 
-import           Control.Monad (unless, MonadPlus, mzero)
+import           Control.Monad (unless)
 import           Control.Monad.Trans(MonadIO, liftIO)
 import           Data.Time.Clock(getCurrentTime)
 import           Database.HDBC
@@ -35,48 +35,45 @@ savePasteToDb db paste = do
     return (fromSql uid)
 
 
-getAllPastes :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> m [Paste]
-getAllPastes db = do
-    pastes <- liftIO $ handleSqlError $ quickQuery db "SELECT * FROM pastes ORDER BY title" []
-    return $ map makePaste pastes
-    where makePaste ([pid, tit, ts, synt, cont]) =
-              Paste { pasteId = fromSql pid
-                    , pasteTitle = fromSql tit
-                    , pasteTimestamp = fromSql ts
-                    , pasteSyntax = fromSql synt
-                    , pasteContents = fromSql cont }
-          makePaste _ = nullPaste
+getAllPastes :: (MonadIO m, IConnection conn) => conn -> m [Paste]
+getAllPastes db = pastesFromQuery db "SELECT * FROM pastes ORDER BY title" []
 
-getPasteFromDb :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> Integer -> m Paste
+
+getPasteFromDb :: (Functor m, MonadIO m, IConnection conn) => conn -> Integer -> m Paste
 getPasteFromDb db uid = do
-    pastes <- liftIO $ handleSqlError $
-                quickQuery db "SELECT * FROM pastes WHERE id = ?" [toSql uid]
-    case pastes of
-         ([_, tit, ts, synt, cont]:_) ->
-             return Paste { pasteId = uid
-                          , pasteTitle = fromSql tit
-                          , pasteTimestamp = fromSql ts
-                          , pasteSyntax = fromSql synt
-                          , pasteContents = fromSql cont }
-         _ -> mzero
+    pasteFromQuery db "SELECT * FROM pastes WHERE id = ?" [toSql uid]
 
 
 getAllUsedLanguages :: (MonadIO m, IConnection conn) => conn -> m [String]
 getAllUsedLanguages db = do
-    langs <- liftIO $ handleSqlError $
+    langs <- handleSqlError' $
                quickQuery db "SELECT DISTINCT syntax FROM pastes WHERE syntax != \"\" ORDER BY syntax" []
     return $ map (fromSql . (!! 0)) langs
 
 
-getPastesForLang :: (MonadIO m, MonadPlus m, IConnection conn) => conn -> String -> m [Paste]
-getPastesForLang db lang = do
-    pastes <- liftIO $ handleSqlError $
-                quickQuery db "SELECT * FROM pastes WHERE syntax = ? ORDER BY title" [toSql lang]
+getPastesForLang :: (MonadIO m, IConnection conn) => conn -> String -> m [Paste]
+getPastesForLang db lang =
+    pastesFromQuery db "SELECT * FROM pastes WHERE syntax = ? ORDER BY title" [toSql lang]
+
+
+pasteFromQuery :: (Functor m, MonadIO m, IConnection conn) => conn -> String -> [SqlValue] -> m Paste
+pasteFromQuery db sqlString sqlArgs =
+    fmap (!! 0) $ pastesFromQuery db sqlString sqlArgs
+
+
+pastesFromQuery :: (MonadIO m, IConnection conn) => conn -> String -> [SqlValue] -> m [Paste]
+pastesFromQuery db sqlString sqlArgs = do
+    pastes <- handleSqlError' $ quickQuery db sqlString sqlArgs
     return $ map makePaste pastes
-    where makePaste ([pid, tit, ts, synt, cont]) =
-              Paste { pasteId = fromSql pid
-                    , pasteTitle = fromSql tit
-                    , pasteTimestamp = fromSql ts
-                    , pasteSyntax = fromSql synt
-                    , pasteContents = fromSql cont }
-          makePaste _ = nullPaste
+  where
+    makePaste ::  [SqlValue] -> Paste
+    makePaste [pid, tit, ts, synt, cont] = Paste { pasteId = fromSql pid
+                                                 , pasteTitle = fromSql tit
+                                                 , pasteTimestamp = fromSql ts
+                                                 , pasteSyntax = fromSql synt
+                                                 , pasteContents = fromSql cont }
+    makePaste _                          = nullPaste
+
+
+handleSqlError' ::  (MonadIO m) => IO a -> m a
+handleSqlError' = liftIO . handleSqlError
