@@ -12,6 +12,7 @@ module Views
 import           Prelude hiding (head, div, id)
 import           Control.Monad(forM_)
 
+import           Data.List(intersperse)
 import           Data.Time.Clock(UTCTime)
 import           Data.Time.Format(formatTime)
 import           Text.Blaze.Html5 as H
@@ -99,14 +100,20 @@ layout page_title page_body start_time current_time = docTypeHtml $ do
     body $ do
         header $ do
             h1 $ a ! href "/" $ "Ben's paste bin"
-            nav $ do
-                a ! href "/" $ "All pastes"
-                " | "
-                a ! href "/languages" $ "All used languages"
+            nav $
+                mapM_ (\x -> x) navLinks
         page_body
         footer $ do
             string "Config generated at " >> toHtml start_time
             string ". Page generated at " >> toHtml current_time
+
+
+navLinks ::  [Html]
+navLinks = intersperse " | " links
+    where links = [ a ! href "/"          $ "All pastes"
+                  , a ! href "/languages" $ "All used languages"
+                  , a ! href "/new"       $ "Add new paste"
+                  ]
 
 
 pTitle :: Paste -> Html
