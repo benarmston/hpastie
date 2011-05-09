@@ -9,22 +9,20 @@ module Views
     , languageV
     ) where
 
-import           Prelude hiding (head, div, id)
-import           Control.Monad(forM_)
-
-import           Data.List(intersperse)
-import           Data.Time.Clock(UTCTime)
-import           Data.Time.Format(formatTime)
-import           Text.Blaze.Html5 as H
-import           Text.Blaze.Html5.Attributes as A
-import           Text.Blaze.Renderer.Utf8 (renderHtml)
-import           Text.Highlighting.Kate (FormatOption(..), languages, highlightAs, formatAsXHtml, defaultHighlightingCss)
-import           Snap.Types()
-import           System.Locale(defaultTimeLocale)
-
-import           Types
+import Prelude hiding (head, div, id)
+import Control.Monad(forM_)
 import Data.Maybe (fromMaybe)
-import Data.Monoid (mconcat)
+import Data.Time.Format(formatTime)
+import System.Locale(defaultTimeLocale)
+
+import Snap.Types()
+import Text.Blaze.Html5 as H
+import Text.Blaze.Html5.Attributes as A
+import Text.Blaze.Renderer.Utf8 (renderHtml)
+import Text.Highlighting.Kate (FormatOption(..), languages, highlightAs, formatAsXHtml, defaultHighlightingCss)
+
+import Types
+import Views.Helpers
 
 
 pastesListV :: [Paste] -> Template
@@ -109,39 +107,3 @@ layoutWithHeader page_title page_head page_body start_time current_time = docTyp
 
 layout ::  String -> Html -> Template
 layout page_title = layoutWithHeader page_title Nothing
-
-
-navLinks ::  Html
-navLinks = mconcat $ intersperse " | " links
-    where links = [ a ! href "/"          $ "All pastes"
-                  , a ! href "/languages" $ "All languages"
-                  , a ! href "/new"       $ "Add paste"
-                  ]
-
-
-listOfLinks ::  AttributeValue -> (a -> Html) -> [a] -> Html
-listOfLinks cls linker linkees =
-    ul ! class_ cls $ do
-        forM_ linkees (li . linker)
-
-
-pTitle :: Paste -> Html
-pTitle = toHtml . pasteTitle
-
-
-pUrl :: Paste -> AttributeValue
-pUrl paste = toValue $ "/paste/" ++ pId paste
-
-
-pId :: Paste -> String
-pId = show . pasteId
-
-
-langUrl :: String -> AttributeValue
-langUrl l = toValue $ "/language/" ++ l
-
-inlineCss ::  String -> Maybe Html
-inlineCss = Just . ( H.style ! type_ "text/css" ) . toHtml
-
-instance ToHtml UTCTime where
-    toHtml = string . show
