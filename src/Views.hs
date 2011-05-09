@@ -94,17 +94,19 @@ languageToHtml l pastes = layout ("Pastes for " ++ l) $ do
 layoutWithHeader :: String -> Maybe Html -> Html -> Template
 layoutWithHeader page_title page_head page_body start_time current_time = docTypeHtml $ do
     head $ do
-        H.title $ toHtml page_title
+        H.title $ page_title'
         fromMaybe "" page_head
     body $ do
         header $ do
             h1 $ a ! href "/" $ "Ben's paste bin"
             nav $
                 mapM_ (\x -> x) navLinks
+            h2 page_title'
         page_body
         footer $ do
             string "Config generated at " >> toHtml start_time
             string ". Page generated at " >> toHtml current_time
+    where page_title' = toHtml page_title
 
 
 layout ::  String -> Html -> Template
@@ -114,8 +116,8 @@ layout page_title = layoutWithHeader page_title Nothing
 navLinks ::  [Html]
 navLinks = intersperse " | " links
     where links = [ a ! href "/"          $ "All pastes"
-                  , a ! href "/languages" $ "All used languages"
-                  , a ! href "/new"       $ "Add new paste"
+                  , a ! href "/languages" $ "All languages"
+                  , a ! href "/new"       $ "Add paste"
                   ]
 
 
