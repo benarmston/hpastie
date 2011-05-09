@@ -27,9 +27,8 @@ import Data.Maybe(fromMaybe)
 
 pasteList :: [Paste] -> Template
 pasteList pastes = layout "All pastes" $ do
-    ul ! class_ "pastes" $ do
-        forM_ pastes (li . synopsis)
-    where synopsis paste = a ! href (pUrl paste) $ pTitle paste
+    listOfLinks "pastes" makeLink pastes
+    where makeLink paste = a ! href (pUrl paste) $ pTitle paste
 
 
 pasteForm :: [String] -> Paste -> Template
@@ -73,10 +72,8 @@ pasteToHtml paste = layoutWithHeader "Paste" css $ do
 
 languageList ::  [String] -> Template
 languageList langs = layout "Languages" $ do
-    ul ! class_ "languages" $ do
-        forM_ langs (li . link_to_lang)
-    where link_to_lang l = a ! href (url l) $ toHtml l
-          url l = toValue $ "/language/" ++ l
+    listOfLinks "languages" makeLink langs
+    where makeLink l = a ! href (langUrl l) $ toHtml l
 
 
 languageToHtml :: String -> [Paste] -> Template
@@ -121,6 +118,12 @@ navLinks = intersperse " | " links
                   ]
 
 
+listOfLinks ::  AttributeValue -> (a -> Html) -> [a] -> Html
+listOfLinks cls linker linkees =
+    ul ! class_ cls $ do
+        forM_ linkees (li . linker)
+
+
 pTitle :: Paste -> Html
 pTitle = toHtml . pasteTitle
 
@@ -132,6 +135,9 @@ pUrl paste = toValue $ "/paste/" ++ pId paste
 pId :: Paste -> String
 pId = show . pasteId
 
+
+langUrl :: String -> AttributeValue
+langUrl l = toValue $ "/language/" ++ l
 
 inlineCss ::  String -> Maybe Html
 inlineCss = Just . ( H.style ! type_ "text/css" ) . toHtml
