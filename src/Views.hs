@@ -23,7 +23,8 @@ import           Snap.Types()
 import           System.Locale(defaultTimeLocale)
 
 import           Types
-import Data.Maybe(fromMaybe)
+import Data.Maybe (fromMaybe)
+import Data.Monoid (mconcat)
 
 pasteList :: [Paste] -> Template
 pasteList pastes = layout "All pastes" $ do
@@ -96,8 +97,7 @@ layoutWithHeader page_title page_head page_body start_time current_time = docTyp
     body $ do
         header $ do
             h1 $ a ! href "/" $ "Ben's paste bin"
-            nav $
-                mapM_ (\x -> x) navLinks
+            nav navLinks
             h2 page_title'
         page_body
         footer $ do
@@ -110,8 +110,8 @@ layout ::  String -> Html -> Template
 layout page_title = layoutWithHeader page_title Nothing
 
 
-navLinks ::  [Html]
-navLinks = intersperse " | " links
+navLinks ::  Html
+navLinks = mconcat $ intersperse " | " links
     where links = [ a ! href "/"          $ "All pastes"
                   , a ! href "/languages" $ "All languages"
                   , a ! href "/new"       $ "Add paste"
