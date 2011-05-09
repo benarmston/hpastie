@@ -28,6 +28,7 @@ import           Application
 import           Database
 import           Views
 import           Types
+import           Paste
 
 
 ------------------------------------------------------------------------------
@@ -53,14 +54,12 @@ addPasteH = do
     let paste = nullPaste { pasteTitle = title
                           , pasteContents = contents
                           , pasteSyntax = syntax }
-    let errors = ["Title must not be empty" | isEmpty (pasteTitle paste)] ++
-                 ["Contents must not be empty" | isEmpty (pasteContents paste)]
+    let errors = validatePaste paste
     if not (null errors)
        then renderView $ pasteFormV errors paste
        else do
            uid <- withDb $ flip savePasteToDb paste
            redirect $ pack ("/paste/" ++ show uid)
-    where isEmpty = all (`elem` " \t")
 
 
 ------------------------------------------------------------------------------

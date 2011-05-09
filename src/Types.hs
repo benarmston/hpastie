@@ -1,7 +1,6 @@
 module Types
     ( Template
     , Paste(..)
-    , nullPaste
     ) where
 
 import           Data.Time.Clock(UTCTime)
@@ -21,15 +20,3 @@ data Paste = Paste { pasteId :: Integer         -- ^ The primary key.
                    , pasteTimestamp :: UTCTime  -- ^ The creation date of the paste.
                    , pasteSyntax :: String      -- ^ The syntax to use for syntax highlighting. Any syntax supported by 'Text.Highlighting.Kate'.
                    , pasteContents :: String }
-
-
-------------------------------------------------------------------------------
--- | An empty 'Paste'. Useful for quickly creating a new paste, e.g.,
---
--- > nullPaste { pasteTitle = theTitle }
-nullPaste :: Paste
-nullPaste = Paste  { pasteId = undefined
-                   , pasteTitle = ""
-                   , pasteTimestamp = undefined
-                   , pasteSyntax = ""
-                   , pasteContents = ""}

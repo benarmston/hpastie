@@ -12,6 +12,7 @@ import           Control.Monad.Trans(MonadIO, liftIO)
 import           Data.Time.Clock(getCurrentTime)
 import           Database.HDBC
 import           Types
+import           Paste
 
 
 createTableIfMissing ::  (IConnection conn) => conn -> IO ()
