@@ -1,3 +1,10 @@
  - Improve error handling
    - Navigating to /paste/10/some/more/stuff doesn't return a 404, but renders
      as if the URL was /paste/10
+
+ - Remove requirement to flip certain DB functions.
+ - Write some quick checks.
+ - Use list to maybe in Database pasteFromQuery.
+ - Add some documation.
+ - Path to database should come from a config file or at least from
+   Application.
