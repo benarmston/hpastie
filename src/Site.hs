@@ -32,21 +32,21 @@ import           Types
 
 ------------------------------------------------------------------------------
 -- | Render a list of all pastes
-showPasteList :: Application ()
-showPasteList = withDb getAllPastes >>= (blazeTemplate . pasteList)
+pastesListH :: Application ()
+pastesListH = withDb getAllPastes >>= (renderView . pastesListV)
 
 
 ------------------------------------------------------------------------------
 -- | Renders a form to add a new paste.
-showPasteForm :: Application ()
-showPasteForm = blazeTemplate $ pasteForm [] nullPaste
+pasteFormH :: Application ()
+pasteFormH = renderView $ pasteFormV [] nullPaste
 
 
 ------------------------------------------------------------------------------
 -- | Saves a new paste to the database or redisplays the form with a list of
 -- errors.
-addPaste ::  Application ()
-addPaste = do
+addPasteH ::  Application ()
+addPasteH = do
     title <- decodeParam "title"
     contents <- decodeParam "contents"
     syntax <- decodeParam "syntax"
@@ -56,7 +56,7 @@ addPaste = do
     let errors = ["Title must not be empty" | isEmpty (pasteTitle paste)] ++
                  ["Contents must not be empty" | isEmpty (pasteContents paste)]
     if not (null errors)
-       then blazeTemplate $ pasteForm errors paste
+       then renderView $ pasteFormV errors paste
        else do
            uid <- withDb $ flip savePasteToDb paste
            redirect $ pack ("/paste/" ++ show uid)
@@ -65,35 +65,35 @@ addPaste = do
 
 ------------------------------------------------------------------------------
 -- | Display a single paste.
-showPaste ::  Application ()
-showPaste = getParam "id" >>= maybe pass readPid >>= maybe pass pasteFromId >>= maybe pass showPaste'
+pasteH ::  Application ()
+pasteH = getParam "id" >>= maybe pass readPid >>= maybe pass pasteFromId >>= maybe pass renderPasteV
     where
       readPid pid = case reads (unpack pid) of
                         [(pid', "")] -> return $ Just pid'
                         _            -> return $ Nothing
-      showPaste' = blazeTemplate . pasteToHtml
+      renderPasteV = renderView . pasteV
       pasteFromId pid = withDb $ flip getPasteFromDb pid
 
 
 ------------------------------------------------------------------------------
 -- | Display a list of all languages used by the pastes
-showLanguageList ::  Application ()
-showLanguageList = withDb getAllUsedLanguages >>= blazeTemplate . languageList
+languagesListH ::  Application ()
+languagesListH = withDb getAllUsedLanguages >>= renderView . languagesListV
 
 
 ------------------------------------------------------------------------------
 -- | Display a list of all pastes for the given language.
-showLanguage ::  Application ()
-showLanguage = do
+languageH ::  Application ()
+languageH = do
     lang <- decodeParam "lang"
     pastes <- withDb $ flip getPastesForLang lang
-    blazeTemplate $ languageToHtml lang pastes
+    renderView $ languageV lang pastes
 
 
 ------------------------------------------------------------------------------
 -- | Renders a BlazeHtml template and writes it to the response stream.
-blazeTemplate :: Template -> Application ()
-blazeTemplate template = do
+renderView :: Template -> Application ()
+renderView template = do
     start_time <- startTime
     current_time <- liftIO getCurrentTime
     modifyResponse $ addHeader "Content-Type" "text/html; charset=UTF-8"
@@ -111,11 +111,11 @@ decodeParam = return . unpack . fromMaybe "" <=< getParam
 -- | The main entry point handler.
 site :: Application ()
 site = withDb createTableIfMissing >>
-       route [ ("/",          method GET  $ ifTop $ showPasteList)
-             , ("/new",       method GET  $ showPasteForm)
-             , ("/new",       method POST $ addPaste)
-             , ("/paste/:id", method GET  $ showPaste)
-             , ("/languages", method GET  $ showLanguageList)
-             , ("/language/:lang", method GET $ showLanguage)
+       route [ ("/",          method GET  $ ifTop $ pastesListH)
+             , ("/new",       method GET  $ pasteFormH)
+             , ("/new",       method POST $ addPasteH)
+             , ("/paste/:id", method GET  $ pasteH)
+             , ("/languages", method GET  $ languagesListH)
+             , ("/language/:lang", method GET $ languageH)
              ]
        <|> serveDirectory "resources/static"

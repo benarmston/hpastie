@@ -2,11 +2,11 @@
 
 module Views
     ( renderHtml
-    , pasteForm
-    , pasteToHtml
-    , pasteList
-    , languageList
-    , languageToHtml
+    , pasteFormV
+    , pasteV
+    , pastesListV
+    , languagesListV
+    , languageV
     ) where
 
 import           Prelude hiding (head, div, id)
@@ -26,14 +26,15 @@ import           Types
 import Data.Maybe (fromMaybe)
 import Data.Monoid (mconcat)
 
-pasteList :: [Paste] -> Template
-pasteList pastes = layout "All pastes" $ do
+
+pastesListV :: [Paste] -> Template
+pastesListV pastes = layout "All pastes" $ do
     listOfLinks "pastes" makeLink pastes
     where makeLink paste = a ! href (pUrl paste) $ pTitle paste
 
 
-pasteForm :: [String] -> Paste -> Template
-pasteForm errors paste = layout "Paste form" $ do
+pasteFormV :: [String] -> Paste -> Template
+pasteFormV errors paste = layout "Paste form" $ do
     ul ! class_ "errors" $ do
         forM_ errors (li . toHtml)
     H.form ! method "POST" $ do
@@ -49,8 +50,8 @@ pasteForm errors paste = layout "Paste form" $ do
         input ! type_ "submit" ! value "Save"
 
 
-pasteToHtml ::  Paste -> Template
-pasteToHtml paste = layoutWithHeader "Paste" css $ do
+pasteV ::  Paste -> Template
+pasteV paste = layoutWithHeader "Paste" css $ do
     div ! (id uid) $ do
         h2 $ pTitle paste
         p ! class_ "timestamp" $ toHtml $ "Uploaded at " ++ formattedTime
@@ -71,14 +72,14 @@ pasteToHtml paste = layoutWithHeader "Paste" css $ do
           css = inlineCss $ defaultHighlightingCss
 
 
-languageList ::  [String] -> Template
-languageList langs = layout "Languages" $ do
+languagesListV ::  [String] -> Template
+languagesListV langs = layout "Languages" $ do
     listOfLinks "languages" makeLink langs
     where makeLink l = a ! href (langUrl l) $ toHtml l
 
 
-languageToHtml :: String -> [Paste] -> Template
-languageToHtml l pastes = layout ("Pastes for " ++ l) $ do
+languageV :: String -> [Paste] -> Template
+languageV l pastes = layout ("Pastes for " ++ l) $ do
     p intro
     ul ! class_ "pastes" $ do
         forM_ pastes (li . synopsis)
