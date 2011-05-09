@@ -23,7 +23,7 @@ import           Snap.Types()
 import           System.Locale(defaultTimeLocale)
 
 import           Types
-
+import Data.Maybe(fromMaybe)
 
 pasteList :: [Paste] -> Template
 pasteList pastes = layout "All pastes" $ do
@@ -50,7 +50,7 @@ pasteForm errors paste = layout "Paste form" $ do
 
 
 pasteToHtml ::  Paste -> Template
-pasteToHtml paste = layout "Paste" $ do
+pasteToHtml paste = layoutWithHeader "Paste" css $ do
     div ! (id uid) $ do
         h2 $ pTitle paste
         p ! class_ "timestamp" $ toHtml $ "Uploaded at " ++ formattedTime
@@ -68,6 +68,7 @@ pasteToHtml paste = layout "Paste" $ do
                                   then ""
                                   else p ! class_ "syntax" $ "Language " >> syntaxLink
           syntaxLink = a ! href (toValue $ "/language/" ++ syntax) $ toHtml syntax
+          css = inlineCss $ defaultHighlightingCss
 
 
 languageList ::  [String] -> Template
@@ -90,13 +91,11 @@ languageToHtml l pastes = layout ("Pastes for " ++ l) $ do
 
 
 
-layout :: String -> Html -> Template
-layout page_title page_body start_time current_time = docTypeHtml $ do
+layoutWithHeader :: String -> Maybe Html -> Html -> Template
+layoutWithHeader page_title page_head page_body start_time current_time = docTypeHtml $ do
     head $ do
         H.title $ toHtml page_title
-        -- XXX Move outside of layout. Perhaps views can provide a page_head
-        -- to include?
-        H.style ! type_ "text/css" $ toHtml defaultHighlightingCss
+        fromMaybe "" page_head
     body $ do
         header $ do
             h1 $ a ! href "/" $ "Ben's paste bin"
@@ -106,6 +105,10 @@ layout page_title page_body start_time current_time = docTypeHtml $ do
         footer $ do
             string "Config generated at " >> toHtml start_time
             string ". Page generated at " >> toHtml current_time
+
+
+layout ::  String -> Html -> Template
+layout page_title = layoutWithHeader page_title Nothing
 
 
 navLinks ::  [Html]
@@ -127,6 +130,9 @@ pUrl paste = toValue $ "/paste/" ++ pId paste
 pId :: Paste -> String
 pId = show . pasteId
 
+
+inlineCss ::  String -> Maybe Html
+inlineCss = Just . ( H.style ! type_ "text/css" ) . toHtml
 
 instance ToHtml UTCTime where
     toHtml = string . show
