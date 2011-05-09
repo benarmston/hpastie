@@ -15,7 +15,6 @@ import Data.Maybe (fromMaybe)
 import Data.Time.Format(formatTime)
 import System.Locale(defaultTimeLocale)
 
-import Snap.Types()
 import Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes as A
 import Text.Blaze.Renderer.Utf8 (renderHtml)

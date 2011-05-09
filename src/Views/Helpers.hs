@@ -20,6 +20,7 @@ import Data.Monoid (mconcat)
 import Data.List (intersperse)
 import Data.Time.Clock (UTCTime)
 
+import Snap.Types()
 import Text.Blaze.Html5 as H
 import Text.Blaze.Html5.Attributes as A
 
