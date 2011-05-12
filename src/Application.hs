@@ -10,10 +10,13 @@ module Application
   , applicationInitializer
   ) where
 
+import Control.Monad.Trans (liftIO)
+
 import           Snap.Extension
 import           Snap.Extension.Timer.Impl
 import           Snap.Extension.HDBC.Sqlite
 
+import           Config
 
 ------------------------------------------------------------------------------
 -- | 'Application' is our application's monad. It uses 'SnapExtend' from
@@ -53,6 +56,7 @@ instance HasHDBCState ApplicationState where
 -- to worry about.
 applicationInitializer :: Initializer ApplicationState
 applicationInitializer = do
+    conf <- liftIO $ getConfig "pastie.cfg"
     timer <- timerInitializer
-    conn <- hdbcInitializer
+    conn <- hdbcInitializer $ configDbFile conf
     return $ ApplicationState timer conn

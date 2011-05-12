@@ -1,6 +1,7 @@
 module Types
     ( Template
     , Paste(..)
+    , Config(..)
     ) where
 
 import           Data.Time.Clock(UTCTime)
@@ -20,3 +21,8 @@ data Paste = Paste { pasteId :: Integer         -- ^ The primary key.
                    , pasteTimestamp :: UTCTime  -- ^ The creation date of the paste.
                    , pasteSyntax :: String      -- ^ The syntax to use for syntax highlighting. Any syntax supported by 'Text.Highlighting.Kate'.
                    , pasteContents :: String }
+
+
+data Config = Config {
+      configDbFile :: FilePath  -- ^ The path to the Sqlite database to use.
+    } deriving (Show)

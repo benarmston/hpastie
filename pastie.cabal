@@ -9,7 +9,7 @@ Maintainer:          ben.armston@googlemail.com
 Stability:           Experimental
 Category:            Web
 Build-type:          Simple
-Extra-source-files:  LICENSE
+Extra-source-files:  LICENSE, pastie.cfg
 Cabal-version:       >=1.6
 
 Flag development
@@ -37,6 +37,7 @@ Executable pastie
     , HDBC-sqlite3 == 2.3.*
     , old-locale >= 1.0.0.2
     , highlighting-kate >= 0.2.9 && < 0.3
+    , ConfigFile >= 1.0 && < 1.1
 
   extensions: TypeSynonymInstances MultiParamTypeClasses
 

@@ -6,8 +6,7 @@
  - Write some quick checks.
  - Use list to maybe in Database pasteFromQuery.
  - Add some documation.
- - Path to database should come from a config file or at least from
-   Application.
+ - Path to config file should come from command line options.
  - Use applicative forms or some such.
  - style / layout / usability changes
    - show add paste form prominently on index page

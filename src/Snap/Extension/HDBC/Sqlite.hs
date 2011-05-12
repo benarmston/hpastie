@@ -34,9 +34,9 @@ class HasHDBCState s where
 ------------------------------------------------------------------------------
 -- XXX Should take the connection string as an argument.
 -- XXX Should implement a pool. At least for non-sqlite implementations.
-hdbcInitializer :: Initializer HDBCState
-hdbcInitializer = do
-    db <- liftIO $ handleSqlError $ connectSqlite3 "pastes.sql"
+hdbcInitializer :: FilePath -> Initializer HDBCState
+hdbcInitializer dbfile = do
+    db <- liftIO $ handleSqlError $ connectSqlite3 dbfile
     mkInitializer $ HDBCState $ ConnWrapper db
 
 
