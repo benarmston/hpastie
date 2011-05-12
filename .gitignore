@@ -1,4 +1,5 @@
 *~
 log/
 dist/
+cabal-dev/
 pastes.sql

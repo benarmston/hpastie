@@ -99,8 +99,8 @@ layoutWithHeader page_title page_head page_body start_time current_time = docTyp
             h2 page_title'
         page_body
         footer $ do
-            string "Config generated at " >> toHtml start_time
-            string ". Page generated at " >> toHtml current_time
+            "Config generated at " >> toHtml start_time
+            ". Page generated at " >> toHtml current_time
     where page_title' = toHtml page_title
 
 
