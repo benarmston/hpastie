@@ -8,3 +8,9 @@
  - Add some documation.
  - Path to database should come from a config file or at least from
    Application.
+ - Use applicative forms or some such.
+ - style / layout / usability changes
+   - show add paste form prominently on index page
+   - show most recent pastes on index page
+   - pagination for all pastes page
+   - pagination for pastes for language page
