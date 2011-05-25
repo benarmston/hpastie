@@ -4,7 +4,6 @@
 
  - Remove requirement to flip certain DB functions.
  - Write some quick checks.
- - Use list to maybe in Database pasteFromQuery.
  - Add some documation.
  - Path to config file should come from command line options.
  - Use applicative forms or some such.

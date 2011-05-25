@@ -9,6 +9,7 @@ module Database
 
 import           Control.Monad (unless)
 import           Control.Monad.Trans(MonadIO, liftIO)
+import           Data.Maybe (listToMaybe)
 import           Data.Time.Clock(getCurrentTime)
 import           Database.HDBC
 import           Types
@@ -60,9 +61,7 @@ getPastesForLang db lang =
 pasteFromQuery :: (Functor m, MonadIO m, IConnection conn) => conn -> String -> [SqlValue] -> m (Maybe Paste)
 pasteFromQuery db sqlString sqlArgs = do
     pastes <- pastesFromQuery db sqlString sqlArgs
-    case pastes of
-         [] -> return Nothing
-         _  -> return . Just $ pastes !! 0
+    return $ listToMaybe pastes
 
 
 pastesFromQuery :: (MonadIO m, IConnection conn) => conn -> String -> [SqlValue] -> m [Paste]
