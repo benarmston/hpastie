@@ -83,4 +83,4 @@ inlineCss = Just . ( H.style ! type_ "text/css" ) . toHtml
 
 
 instance ToHtml UTCTime where
-    toHtml = string . show
+    toHtml = toHtml . show

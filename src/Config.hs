@@ -16,4 +16,4 @@ getConfig conf = do
         return Config { configDbFile = dbfile }
   case config of
     Left cperr -> error $ show cperr
-    Right config -> return config
+    Right config' -> return config'
