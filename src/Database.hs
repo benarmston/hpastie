@@ -42,7 +42,7 @@ getAllPastes db = pastesFromQuery db "SELECT * FROM pastes ORDER BY title" []
 
 
 getPasteFromDb :: (Functor m, MonadIO m, IConnection conn) => conn -> Integer -> m (Maybe Paste)
-getPasteFromDb db uid = do
+getPasteFromDb db uid =
     pasteFromQuery db "SELECT * FROM pastes WHERE id = ?" [toSql uid]
 
 

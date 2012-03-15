@@ -69,7 +69,7 @@ pasteH = getParam "id" >>= maybe pass readPid >>= maybe pass pasteFromId >>= may
     where
       readPid pid = case reads (unpack pid) of
                         [(pid', "")] -> return $ Just pid'
-                        _            -> return $ Nothing
+                        _            -> return Nothing
       renderPasteV = renderView . pasteV
       pasteFromId pid = withDb $ flip getPasteFromDb pid
 
@@ -110,11 +110,11 @@ decodeParam = return . unpack . fromMaybe "" <=< getParam
 -- | The main entry point handler.
 site :: Application ()
 site = withDb createTableIfMissing >>
-       route [ ("/",          method GET  $ ifTop $ pastesListH)
-             , ("/new",       method GET  $ pasteFormH)
-             , ("/new",       method POST $ addPasteH)
-             , ("/paste/:id", method GET  $ pasteH)
-             , ("/languages", method GET  $ languagesListH)
-             , ("/language/:lang", method GET $ languageH)
+       route [ ("/",          method GET  $ ifTop pastesListH)
+             , ("/new",       method GET  pasteFormH)
+             , ("/new",       method POST addPasteH)
+             , ("/paste/:id", method GET  pasteH)
+             , ("/languages", method GET  languagesListH)
+             , ("/language/:lang", method GET languageH)
              ]
        <|> serveDirectory "resources/static"

@@ -25,21 +25,21 @@ import Views.Helpers
 
 
 pastesListV :: [Paste] -> Template
-pastesListV pastes = layout "All pastes" $ do
+pastesListV pastes = layout "All pastes" $
     listOfLinks "pastes" makeLink pastes
     where makeLink paste = a ! href (pUrl paste) $ pTitle paste
 
 
 pasteFormV :: [String] -> Paste -> Template
 pasteFormV errors paste = layout "Paste form" $ do
-    ul ! class_ "errors" $ do
+    ul ! class_ "errors" $
         forM_ errors (li . toHtml)
     H.form ! method "POST" $ do
         H.label "Title"
         input ! name "title" ! size "50" ! value (toValue $ pasteTitle paste)
         br
         H.label "Language"
-        select ! name "syntax" ! (value $ toValue $ pasteSyntax paste) $ do
+        select ! name "syntax" ! value (toValue $ pasteSyntax paste) $
           forM_ ("":languages) (\o -> option ! value (toValue o) $ toHtml o)
         br
         textarea ! name "contents" ! rows "20" ! cols "76" $ toHtml $ pasteContents paste
@@ -48,12 +48,12 @@ pasteFormV errors paste = layout "Paste form" $ do
 
 
 pasteV ::  Paste -> Template
-pasteV paste = layoutWithHeader "Paste" css $ do
-    div ! (id uid) $ do
+pasteV paste = layoutWithHeader "Paste" css $
+    div ! id uid $ do
         h2 $ pTitle paste
         p ! class_ "timestamp" $ toHtml $ "Uploaded at " ++ formattedTime
         maybeDisplaySyntax
-        pre $ formattedCode
+        pre formattedCode
     where contents = filter (/='\r') $ pasteContents paste
           syntax = pasteSyntax paste
           formattedCode = case highlightAs syntax contents of
@@ -66,11 +66,11 @@ pasteV paste = layoutWithHeader "Paste" css $ do
                                   then ""
                                   else p ! class_ "syntax" $ "Language " >> syntaxLink
           syntaxLink = a ! href (toValue $ "/language/" ++ syntax) $ toHtml syntax
-          css = inlineCss $ defaultHighlightingCss
+          css = inlineCss defaultHighlightingCss
 
 
 languagesListV ::  [String] -> Template
-languagesListV langs = layout "Languages" $ do
+languagesListV langs = layout "Languages" $
     listOfLinks "languages" makeLink langs
     where makeLink l = a ! href (langUrl l) $ toHtml l
 
@@ -78,7 +78,7 @@ languagesListV langs = layout "Languages" $ do
 languageV :: String -> [Paste] -> Template
 languageV l pastes = layout ("Pastes for " ++ l) $ do
     p intro
-    ul ! class_ "pastes" $ do
+    ul ! class_ "pastes" $
         forM_ pastes (li . synopsis)
     where synopsis paste = a ! href (pUrl paste) $ pTitle paste
           intro = toHtml $ if l == ""
@@ -90,7 +90,7 @@ languageV l pastes = layout ("Pastes for " ++ l) $ do
 layoutWithHeader :: String -> Maybe Html -> Html -> Template
 layoutWithHeader page_title page_head page_body start_time current_time = docTypeHtml $ do
     head $ do
-        H.title $ page_title'
+        H.title page_title'
         fromMaybe "" page_head
     body $ do
         header $ do

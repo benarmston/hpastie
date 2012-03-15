@@ -32,8 +32,7 @@ import Types
 --
 listOfLinks ::  AttributeValue -> (a -> Html) -> [a] -> Html
 listOfLinks cls linker linkees =
-    ul ! class_ cls $ do
-        forM_ linkees (li . linker)
+    ul ! class_ cls $ forM_ linkees (li . linker)
 
 
 ------------------------------------------------------------------------------
