@@ -4,7 +4,7 @@
 
  - Remove requirement to flip certain DB functions.
  - Write some quick checks.
- - Add some documation.
+ - Add some documentation.
  - Path to config file should come from command line options.
  - Use applicative forms or some such.
  - style / layout / usability changes
