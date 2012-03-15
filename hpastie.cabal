@@ -1,4 +1,4 @@
-Name:                pastie
+Name:                hpastie
 Version:             0.1
 Synopsis:            A simple paste bin web app
 Description:         A paste bin web app using the snap web framework.
@@ -9,14 +9,14 @@ Maintainer:          ben.armston@googlemail.com
 Stability:           Experimental
 Category:            Web
 Build-type:          Simple
-Extra-source-files:  LICENSE, pastie.cfg
+Extra-source-files:  LICENSE, hpastie.cfg
 Cabal-version:       >=1.6
 
 Flag development
   Description: Whether to build the server in development (interpreted) mode
   Default: False
 
-Executable pastie
+Executable hpastie
   hs-source-dirs: src
   main-is: Main.hs
 

@@ -56,7 +56,7 @@ instance HasHDBCState ApplicationState where
 -- to worry about.
 applicationInitializer :: Initializer ApplicationState
 applicationInitializer = do
-    conf <- liftIO $ getConfig "pastie.cfg"
+    conf <- liftIO $ getConfig "hpastie.cfg"
     timer <- timerInitializer
     conn <- hdbcInitializer $ configDbFile conf
     return $ ApplicationState timer conn
